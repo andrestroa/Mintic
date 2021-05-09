@@ -13,9 +13,9 @@ Además, la cantidad de antenas previamente instaladas tiene que ser un número 
 |  **Entrada Esperada** |**Salida Esperada**   |
 | ------------ | ------------ |
 | **984556.95** *7*   **c  **  |15   |
-| ** 4231151.24** *26*  **e**   |  508 |
-| **67921.33** *21*  **d**  |   0  |
-| **182856.1** *-1*  **c**   |  error en los datos |
+| **4231151.24** *26*  **e **   |  508 |
+| **67921.33** *21*  **d **  |   0  |
+| **182856.1** *-1*  **c **   |  error en los datos |
 
 
 
