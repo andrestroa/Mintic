@@ -1,11 +1,10 @@
-from math import ceil, perm
-from collections import defaultdict
-from functools import reduce
+from math import ceil, perm #Importa libreria para redondear
+from collections import defaultdict #Importar libreria para modificar diccionarios
+import os
 
+OLD_ANTENNAS = 18400 #Cobertura de antena
 
-OLD_ANTENNAS = 18400
-
-antennas ={  
+antennas ={   #Diccionario de antenas nuevas
     "a":35600,
     "b":6800,
     "c":59300,
@@ -13,99 +12,98 @@ antennas ={
     "e":7400,
 }
 
-
-def zonas_de_usuario():
-    zonas = int(input('Ingrese el número de zonas que tiene '))
-    if zonas == 0:
+def user_zones(): #Función que pide zonas al usuario
+    zones = int(input('Ingrese el número de zonas que tiene ')) 
+    if zones == 0: #Verifica si las zonas ingresadas son igual a 0
         return False
     else:
-        return zonas
+        return zones #Si no es 0 regresa las zonas 
 
 
-def obtencion_de_datos(numero_de_zonas):
-    areas_totales = []
-    antenas_previas = []
-    new_antenas = []
-    antenas_totales = 0
-    porcentaje_de_antenas = defaultdict(list)
-    verificacion_de_valores = defaultdict(list)
-    no_esta = []
+def data_obtaining(number_of_zones): #Pide al usuario los datos para validar
+    total_areas = [] #Lista con el tamaño de las zonas
+    previous_antennas = [] #Las antenas previas instaladas
+    new_antennas = [] #El tipo de nueva antena
+    total_antennas = 0 #Suma de antenas a instalar
+    percentage_of_antennas = defaultdict(list) #Diccionario con la suma de cada antena
+    values_checking = defaultdict(list) #Diccionario con las anntenas a instalar
+    antenna_type_check = [] #Verifica si la antena existe o no
 
 
-    for zona in range(1, numero_de_zonas+1):
-        area_de_instalacion = float(input('Ingrese el area del terreno en m2 '))
-        antenas_instaladas = int(input('Ingrese el número de antenas previamente instaladas '))
-        tipo_de_nueva_antena = input('Ingrese el tipo de antena que desea ') #Agregar información de diccionario antennas
-        areas_totales.append(area_de_instalacion)
-        antenas_previas.append(antenas_instaladas)
-        new_antenas.append(tipo_de_nueva_antena)
+    for zone in range(1, number_of_zones+1): #Bucle que pide los valores al usuario y los agrega a la lista
+        installation_area = float(input('Ingrese el area del terreno en m2 ')) 
+        antennas_installed = int(input('Ingrese el número de antenas previamente instaladas '))
+        type_of_new_antenna = input('Ingrese el tipo de antena que desea ') 
+        total_areas.append(installation_area) 
+        previous_antennas.append(antennas_installed)
+        new_antennas.append(type_of_new_antenna)
 
-    for news in new_antenas:
-        if news not in antennas.keys():
-            no_esta.append(False)
+    for new in new_antennas: #Bucle que verifica si el tipo de antena existe
+        if new not in antennas.keys(): #Si el tipo de antena no se encuentra en el diccionario de antennas
+            antenna_type_check.append(False) #Agrega un False a la lista
     
-    if False in no_esta:
+    if False in antenna_type_check: #Verifica si la lista contiene un diccionarios, si lo contiene imprime el código
         print(0)
-        for llaves in antennas.keys():
-            print(f'{llaves} 0.00%')
+        for antenna_keys in antennas.keys():
+            print(f'{antenna_keys} 0.00%')
             
     else:
-        for antena in antennas.keys():
-            verificacion_de_valores[antena]
+        for antenna in antennas.keys(): #Agrega las llaves al diccionario 
+            values_checking[antenna]
 
-        for i in antenas_previas:
-            if i < 0:
-                x = antenas_previas.index(i)
-                y = new_antenas[x]
-                verificacion_de_valores[y].append(0)
+        for old_antenna in previous_antennas: #verifica si las antenas previas son negativas
+            if old_antenna < 0:
+                old_antenna_position = previous_antennas.index(old_antenna) #Regresa la posición de la antena negativa
+                new_antenna_position = new_antennas[old_antenna_position] #Busca la posición de la nueva antena que le corresponde el valor negativo
+                values_checking[new_antenna_position].append(0) #Se agrega la variable anterior como llave y como valor 0
             else:
-                x = antenas_previas.index(i)
-                y = new_antenas[x]
-                z = ceil((areas_totales[x] - (i* OLD_ANTENNAS)) /(antennas.get(y)))
-                if z < 0:
-                    verificacion_de_valores[y].append(0)
+                old_antenna_position = previous_antennas.index(old_antenna) #Regresa la posición de la antena 
+                new_antenna_position = new_antennas[old_antenna_position] #Busca la posición de la nueva antena que le corresponde
+                antenna_formula = ceil((total_areas[old_antenna_position] - (old_antenna* OLD_ANTENNAS)) /(antennas.get(new_antenna_position))) #Genera la operación
+                if antenna_formula < 0: #Verifica si el resultado no es negativo
+                    values_checking[new_antenna_position].append(0) #Si es negativo agrega al diccionario la antena que se esta verificando y el valor 0
                 else:
-                    verificacion_de_valores[y].append(z)
+                    values_checking[new_antenna_position].append(antenna_formula) #Agrega al diccionario la antena que se esta verificando y el resultado 
 
-        for keys,values in verificacion_de_valores.items():
-            for sumas in values:
-                antenas_totales += sumas
+        for keys,values in values_checking.items(): #Recorre el diccionario con los valores previos
+            for element in values: #verifica cada lista que se encuentra en los valores
+                total_antennas += element #Suma los valores recorridos
 
-        for keys,values in verificacion_de_valores.items():
-            x = 0
-            for sumas in values:
-                x += sumas
-                porcentaje_de_antenas[keys] = round(((x*100)/antenas_totales),2)
+        for keys,values in values_checking.items(): #Recorre el diccionario
+            sum_of_antennas = 0 #Crea una variable para verificar la suma de cada tipo de antena y cada iteración la inicia en 0
+            for element in values: #Recorreo los valores de cada lista 
+                sum_of_antennas += element #Suma cada valor encontrado en la lista
+                percentage_of_antennas[keys] = round(((sum_of_antennas*100)/total_antennas),2) #Agrega al diccionario la llave recorrida y el porcentaje de la operación
 
         
-        for key in antennas.keys():
-            if key not in porcentaje_de_antenas:
-                porcentaje_de_antenas[key] = 0.00
+        for key in antennas.keys(): #Recorre el diccionario 
+            if key not in percentage_of_antennas: #Verifica si antena hace falta al diccionario
+                percentage_of_antennas[key] = 0.00 #Si no esta se agrega y se le asigna el valor 0.00
         
         
-        porcentaje_de_antenas = sorted(porcentaje_de_antenas.items())
-        porcentaje_de_antenas = dict(porcentaje_de_antenas)
+        percentage_of_antennas = sorted(percentage_of_antennas.items()) #Se convierte el diccionario en lista y se ordena
+        percentage_of_antennas = dict(percentage_of_antennas) #Lueg se convierte en diccionario
 
 
-        for keys, values in porcentaje_de_antenas.items():
-            if values == 0.0:
-                porcentaje_de_antenas[keys] = "0.00"
+        for keys, values in percentage_of_antennas.items(): #Se recorre el diccionario
+            if values == 0.0: #Si el valor de la llave es 0.00
+                percentage_of_antennas[keys] = "0.00" #Se cambia a 0.00
         
 
-        print(antenas_totales)
-        for key, values in porcentaje_de_antenas.items():
-            print(f'{key} {values}%')   
-
-
+        print(total_antennas) #Se imprime el total de antenas
+        for key, values in percentage_of_antennas.items(): #Se recorre el diccionario 
+            print(f'{key} {values}%') #Imprime la llave y su valor con porcentaje   
 
 
 def run():
-    numero_de_zonas = zonas_de_usuario()
-    if numero_de_zonas == False:
-        for llaves in antennas.keys():
-            print(f'{llaves} 0.00%')
-    else:
-        datos_de_zonas = obtencion_de_datos(numero_de_zonas)     
+    os.system("cls")
+    number_of_zones = user_zones() #Pide las zonas al usuario y regresa un valor el número o un False
+    if number_of_zones == False: #Si el valor regresado es False se imprime el siguiente código
+        for antenna_keys in antennas.keys():
+            print(0)
+            print(f'{antenna_keys} 0.00%')
+    else: #Si es un número se continua con el código
+        data_obtaining(number_of_zones) #Pide lso demás datos al usuario y crecibe como parametro el número de zonas       
     
 
 if __name__ == '__main__':
