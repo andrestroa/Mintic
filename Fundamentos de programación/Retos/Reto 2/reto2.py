@@ -1,6 +1,6 @@
-from math import ceil, perm #Importa libreria para redondear
+from math import ceil #Importa libreria para redondear
 from collections import defaultdict #Importar libreria para modificar diccionarios
-import os
+import os #Importa libreria para limpiar consola
 
 OLD_ANTENNAS = 18400 #Cobertura de antena
 
@@ -17,90 +17,111 @@ def user_zones(): #Función que pide zonas al usuario
     if zones == 0: #Verifica si las zonas ingresadas son igual a 0
         return False
     else:
-        return zones #Si no es 0 regresa las zonas 
-
+        return zones #Si no es 0 regresa las zonas
 
 def data_obtaining(number_of_zones): #Pide al usuario los datos para validar
 
+    data_collection = defaultdict(list)
+    for zone in range(1, number_of_zones+1): #Bucle que pide los valores al usuario y los agrega al diccionario
+        installation_area = float(input('Ingrese el area del terreno en m2 ')) 
+        antennas_installed = int(input('Ingrese el número de antenas previamente instaladas '))
+        type_of_new_antenna = input('Ingrese el tipo de antena que desea ')
+        data_collection[zone].append(installation_area) 
+        data_collection[zone].append(antennas_installed) 
+        data_collection[zone].append(type_of_new_antenna)
+
+    antenna_verification(data_collection) #Envia el diccionario a la función para verificar el tipo de nueva antena
+
+def antenna_verification(data_collection):
+
+    data_collection_copy = defaultdict(list)
+
+    for zone, values in data_collection.items(): #Crea un bucle para verificar los datos del diccionario
+        for element in range(2,len(values)): #Recorre unicamente el elemento 2 de la lista
+            if values[element] in antennas.keys(): #Verificar si el elemento se encuentra en el diccionario de antenas
+                data_collection_copy[zone] = values #Si se encuentra lo agrega al nuevo diccionario con sus valores
+    
+    for zone, values in data_collection.items(): #Crea un bucle para verificar los datos del diccionario
+        for element in range(1,len(values)-1): #Recorre unicamente el elemento 1 de la lista
+            if values[element] < 0: #Si el elemento es menor agrega a esa llave un 0
+                data_collection_copy[zone].append(0)
+    
+    antenna_count(data_collection_copy) #Envia el diccionario a la función para realizar la operación de antenas de cada zona
+
+def antenna_count(data_collection_copy):
+
     try:
-        total_areas = [] #Lista con el tamaño de las zonas
-        previous_antennas = [] #Las antenas previas instaladas
-        new_antennas = [] #El tipo de nueva antena
-        total_antennas = 0 #Suma de antenas a instalar
-        percentage_of_antennas = defaultdict(list) #Diccionario con la suma de cada antena
-        values_checking = defaultdict(list) #Diccionario con las anntenas a instalar
-        antenna_type_check = [] #Verifica si la antena existe o no
-    
-    
-        for zone in range(1, number_of_zones+1): #Bucle que pide los valores al usuario y los agrega a la lista
-            installation_area = float(input('Ingrese el area del terreno en m2 ')) 
-            antennas_installed = int(input('Ingrese el número de antenas previamente instaladas '))
-            type_of_new_antenna = input('Ingrese el tipo de antena que desea ') 
-            total_areas.append(installation_area) 
-            previous_antennas.append(antennas_installed)
-            new_antennas.append(type_of_new_antenna)
-    
-        for new in new_antennas: #Bucle que verifica si el tipo de antena existe
-            if new not in antennas.keys(): #Si el tipo de antena no se encuentra en el diccionario de antennas
-                antenna_type_check.append(False) #Agrega un False a la lista
         
-        if False in antenna_type_check: #Verifica si la lista contiene un diccionarios, si lo contiene imprime el código
-            print(0)
-            for antenna_keys in antennas.keys():
-                print(f'{antenna_keys} 0.00%')
-                
-        else:
-            for antenna in antennas.keys(): #Agrega las llaves al diccionario 
-                values_checking[antenna]
+        full_data = defaultdict(list)
+        full_data = data_collection_copy    
     
-            for old_antenna in previous_antennas: #verifica si las antenas previas son negativas
-                if old_antenna < 0:
-                    old_antenna_position = previous_antennas.index(old_antenna) #Regresa la posición de la antena negativa
-                    new_antenna_position = new_antennas[old_antenna_position] #Busca la posición de la nueva antena que le corresponde el valor negativo
-                    values_checking[new_antenna_position].append(0) #Se agrega la variable anterior como llave y como valor 0
-                else:
-                    old_antenna_position = previous_antennas.index(old_antenna) #Regresa la posición de la antena 
-                    new_antenna_position = new_antennas[old_antenna_position] #Busca la posición de la nueva antena que le corresponde
-                    antenna_formula = ceil((total_areas[old_antenna_position] - (old_antenna* OLD_ANTENNAS)) /(antennas.get(new_antenna_position))) #Genera la operación
-                    if antenna_formula < 0: #Verifica si el resultado no es negativo
-                        values_checking[new_antenna_position].append(0) #Si es negativo agrega al diccionario la antena que se esta verificando y el valor 0
+        for zone,values in data_collection_copy.items(): #Crea un bucle para verificar los datos del diccionario
+            for element in range(0,len(values)): #Recorre una lista
+                antenna_formula = ceil((values[0] - (values[1]* OLD_ANTENNAS)) /(antennas.get(values[2]))) #Realiza operación            
+                if len(values) == 4: #Si la lista tiene 4 valores singifica que tiene un 0 que es el valor de las antenas a instalar
+                    pass       
+                else: #Si no lo tiene se verifica lo siguienten
+                    if antenna_formula < 0: #Si el resultado de la operación es negativo se agrega a la llave un 0 en su valor
+                        full_data[zone].append(0)
                     else:
-                        values_checking[new_antenna_position].append(antenna_formula) #Agrega al diccionario la antena que se esta verificando y el resultado 
-    
-            for keys,values in values_checking.items(): #Recorre el diccionario con los valores previos
-                for element in values: #verifica cada lista que se encuentra en los valores
-                    total_antennas += element #Suma los valores recorridos
-    
-            for keys,values in values_checking.items(): #Recorre el diccionario
-                sum_of_antennas = 0 #Crea una variable para verificar la suma de cada tipo de antena y cada iteración la inicia en 0
-                for element in values: #Recorreo los valores de cada lista 
-                    sum_of_antennas += element #Suma cada valor encontrado en la lista
-                    percentage_of_antennas[keys] = round(((sum_of_antennas*100)/total_antennas),2) #Agrega al diccionario la llave recorrida y el porcentaje de la operación
-    
-            
-            for key in antennas.keys(): #Recorre el diccionario 
-                if key not in percentage_of_antennas: #Verifica si antena hace falta al diccionario
-                    percentage_of_antennas[key] = 0.00 #Si no esta se agrega y se le asigna el valor 0.00
-            
-            
-            percentage_of_antennas = sorted(percentage_of_antennas.items()) #Se convierte el diccionario en lista y se ordena
-            percentage_of_antennas = dict(percentage_of_antennas) #Lueg se convierte en diccionario
-    
-    
-            for keys, values in percentage_of_antennas.items(): #Se recorre el diccionario
-                if values == 0.0: #Si el valor de la llave es 0.00
-                    percentage_of_antennas[keys] = "0.00" #Se cambia a 0.00
-            
-    
-            print(total_antennas) #Se imprime el total de antenas
-            for key, values in percentage_of_antennas.items(): #Se recorre el diccionario 
-                print(f'{key} {values}%') #Imprime la llave y su valor con porcentaje   
-    
+                        full_data[zone].append(antenna_formula) #Si no es negativo se agrega el valor 
+        
+        total_antennas(full_data) #Se envia los resultados para sacar los valores finales 
     except ZeroDivisionError:
+        antenna_formula = 0
+        total_antennas(full_data)     
+    
+
+def total_antennas(full_data):
+
+    try:
+    
+        total = 0 #Número de antenas totales a instalar
+        clean_data = defaultdict(list) #Diccionario organizado
+    
+        for zone,values in full_data.items(): #Crea un bucle para verificar los datos del diccionario
+            for element in range(3,len(values)):  #Recorre unicamente el elemento 3 de la lista
+                total += values[element] #Va sumando los elementos a la variable
+        
+        for zone,values in full_data.items(): #Crea un bucle para verificar los datos del diccionario
+            for element in range(3,len(values)): #Recorre unicamente el elemento 3 de la lista
+                antenna_percentage = round(((values[element] * 100)/ total), 2) #Realiza la operación 
+                full_data[zone].append(antenna_percentage) #Agrega al diccionario el resultado 
+    
+        for zone,values in full_data.items(): #Crea un bucle para verificar los datos del diccionario
+            for element_1 in range(len(values)): #Recorre los elementos de la lista 
+                if element_1 == 2: #Verifica si el elemento tiene la posición 2
+                    for element_2 in range(len(values)): #Crea un bucle para verificar los datos del diccionario
+                        if element_2 == 4: #Verifica si el elemento tiene la posición 4              
+                            clean_data[values[element_1]].append(values[element_2]) #Agrega las variable si cumplen la condición al diccionario
+        
+        for antenna,values in clean_data.items(): #Crea un bucle para verificar los datos del diccionario
+            sub_value = 0 #Variable que contendra los valores sumados y luego se reiniciara
+            for element in values: #Verifica los elementos de la lista            
+                sub_value += element #Suma los elementos
+                clean_data[antenna] = sub_value #Agrega al diccionario el valor de la variable 
+        
+        
+        for keys in antennas.keys(): #Crea un bucle para verificar los datos del diccionario
+            if keys not in clean_data.keys(): #Si la llave no se encuentra en el diccionario la agrega 
+                clean_data[keys] = 0.00
+        
+        clean_data = sorted(clean_data.items()) #Organiza el diccionario convirtiendolo en lista
+        clean_data = dict(clean_data) #Cambia la lista a diccionario
+    
+        
+        print(total) #Imprime el total
+        for keys,values in clean_data.items(): #Crea un bucle para verificar los datos del diccionario     
+            if values == 0.0: #Si el valor es 0.00, 
+                print(f'{keys} 0.00%')
+            else: #Si no 
+                print(f'{keys} {values}%')
+
+    except ZeroDivisionError:         
         print(0)
         for antenna_keys in antennas.keys():            
-            print(f'{antenna_keys} 0.00%')
-
+            print(f'{antenna_keys} 0.00%')     
+        
 
 def run():
     os.system("cls")
@@ -110,7 +131,7 @@ def run():
         for antenna_keys in antennas.keys():            
             print(f'{antenna_keys} 0.00%')
     else: #Si es un número se continua con el código
-        data_obtaining(number_of_zones) #Pide lso demás datos al usuario y crecibe como parametro el número de zonas       
+        data_obtaining(number_of_zones) #Pide los demás datos al usuario y recibe como parametro el número de zonas       
     
 
 if __name__ == '__main__':
