@@ -41,9 +41,9 @@ def antenna_verification(data_collection):
             if values[element] in antennas.keys(): #Verificar si el elemento se encuentra en el diccionario de antenas
                 data_collection_copy[zone] = values #Si se encuentra lo agrega al nuevo diccionario con sus valores
     
-    for zone, values in data_collection.items(): #Crea un bucle para verificar los datos del diccionario
+    for zone, values in data_collection_copy.items(): #Crea un bucle para verificar los datos del diccionario
         for element in range(1,len(values)-1): #Recorre unicamente el elemento 1 de la lista
-            if values[element] < 0: #Si el elemento es menor agrega a esa llave un 0
+            if values[element] < 0:
                 data_collection_copy[zone].append(0)
     
     antenna_count(data_collection_copy) #Envia el diccionario a la función para realizar la operación de antenas de cada zona
@@ -85,7 +85,7 @@ def total_antennas(full_data):
         
         for zone,values in full_data.items(): #Crea un bucle para verificar los datos del diccionario
             for element in range(3,len(values)): #Recorre unicamente el elemento 3 de la lista
-                antenna_percentage = round(((values[element] * 100)/ total), 2) #Realiza la operación 
+                antenna_percentage = ((values[element] * 100)/ total) #Realiza la operación 
                 full_data[zone].append(antenna_percentage) #Agrega al diccionario el resultado 
     
         for zone,values in full_data.items(): #Crea un bucle para verificar los datos del diccionario
@@ -115,7 +115,7 @@ def total_antennas(full_data):
             if values == 0.0: #Si el valor es 0.00, 
                 print(f'{keys} 0.00%')
             else: #Si no 
-                print(f'{keys} {values}%')
+                print("{} {:.2f}%".format(keys,values))
 
     except ZeroDivisionError:         
         print(0)
