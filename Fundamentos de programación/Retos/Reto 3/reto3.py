@@ -18,7 +18,7 @@ def departament_land():
     number = True
 
     while number == True:
-        departament,land = input().split("Ingrese la cantidad de departamentos y la cantidad de terrenos ")
+        departament,land = input("Ingrese la cantidad de departamentos y la cantidad de terrenos ").split()
         departament = int(departament)
         land = int(land)
         if departament >= 1:
@@ -39,7 +39,7 @@ def data_obtaining(lands):
 
         while antennas_installed_veificaction == True:
             numb_of_departament,installation_area,antennas_installed,type_of_new_antenna= input("""
-Ingrese el número del departamento,m2 del terreno, número de antenas instaladas y el tipo de antena""").split(" ")
+Ingrese el número del departamento,m2 del terreno, número de antenas instaladas y el tipo de antena """).split(" ")
             numb_of_departament = int(numb_of_departament)
             installation_area = int(installation_area)
             antennas_installed = int(antennas_installed)
